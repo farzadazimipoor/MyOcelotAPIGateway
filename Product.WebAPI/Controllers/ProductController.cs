@@ -1,17 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace Product.WebAPI.Controllers
 {
     [Route("api/x/[controller]")]
-    [ApiController]    
+    [ApiController]   
     public class ProductController : ControllerBase
     {
         // GET api/values
-        [HttpGet("GetProducts")]
+        [HttpGet("GetAuthorizedProducts")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public string Get()
         {
-            return "This Product service";
+            var user = User.Identity.IsAuthenticated;
+
+            var claims = User.Claims.ToList();
+
+            return "Authorized Products";
         }
 
+        [HttpGet("GetPublicProducts")]
+        public string GetPublic()
+        {
+            var user = User.Identity.IsAuthenticated;
+
+            return "Public Products";
+        }
     }
 }

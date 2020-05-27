@@ -2,7 +2,7 @@
   "ReRoutes": [
     //product api config
     {
-      "DownstreamPathTemplate": "/api/x/{everything}",
+      "DownstreamPathTemplate": "/api/x/product/GetAuthorizedProducts",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -10,17 +10,39 @@
           "Port": 50214
         }
       ],
-      "UpstreamPathTemplate": "/api/x/{everything}",
+      "UpstreamPathTemplate": "/AuthorizedProducts",
       "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "PUT",
-        "DELETE"
+        "GET"       
       ],
-      "AuthenticationOptions": {
+      "AuthenticationOptions": { // Authentication
         "AuthenticationProviderKey": "TestKey",
         "AllowedScopes": []
       },
+      "RateLimitOptions": { // To many requests block options
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 1
+      },
+      "FileCacheOptions": {
+        "TtlSeconds": 15,
+        "Region": "productcaching"
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/x/product/GetPublicProducts",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 50214
+        }
+      ],
+      "UpstreamPathTemplate": "/api/x/product/GetPublicProducts",
+      "UpstreamHttpMethod": [
+        "GET"       
+      ],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,

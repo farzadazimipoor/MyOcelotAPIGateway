@@ -1,10 +1,10 @@
-﻿using System;
-using IdentityServer4.AccessTokenValidation;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Ocelot.Cache.CacheManager;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
@@ -27,16 +27,30 @@ namespace OcelotAPIGateway
             
 
             var authenticationProviderKey = "TestKey";
-            Action<IdentityServerAuthenticationOptions> opt = o =>
+            
+            services.AddAuthentication(x =>
             {
-                o.Authority = "https://identity.awronore.krd";
-                o.ApiName = "mainApi";
-                o.SupportedTokens = SupportedTokens.Both;
-                o.RequireHttpsMetadata = false;
-            };
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(authenticationProviderKey, x =>
+            {
+                x.Authority = "https://identity.awronore.krd";
+                x.Audience = "mainApi";
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "https://identity.awronore.krd",
+                    ValidAudience = "mainApi",
+                    RoleClaimType = "role"
+                };
+            });
 
-            services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                .AddIdentityServerAuthentication(authenticationProviderKey, opt);
             services.AddOcelot()
                 .AddCacheManager(x =>
                 {
